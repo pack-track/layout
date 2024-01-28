@@ -1,4 +1,4 @@
-import { Section } from '../layout/section.js';
+import { Section } from './section.js';
 
 export class SectionPosition {
     constructor(

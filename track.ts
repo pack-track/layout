@@ -1,6 +1,6 @@
 import { Positioner } from "./positioner";
 import { Section } from "./section";
-import { SectionPosition } from "./postion";
+import { SectionPosition } from "./position";
 
 export class Track {
 	positioners: Positioner[] = [];
