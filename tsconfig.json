@@ -5,5 +5,5 @@
 		"target": "esnext",
 		"declaration": true
 	},
-	"exclude": [".built", "node_modules"]
+	"include": ["source"]
 }

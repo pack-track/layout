@@ -1,4 +1,4 @@
-import { Layout } from ".";
+import { Layout } from "./layout";
 import { PowerDistrict } from "./power-district";
 import { Router } from "./router";
 import { Section } from "./section";
