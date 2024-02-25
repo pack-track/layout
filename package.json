@@ -1,4 +1,12 @@
 {
 	"name": "@packtrack/layout",
-	"version": "1.0.1"
+	"version": "1.0.1",
+	"main": ".built/index.js",
+	"typings": ".built/index.d.ts",
+	"scripts": {
+		"prepare": "tsc"
+	},
+	"devDependencies": {
+		"typescript": "^5.3.3"
+	}
 }
