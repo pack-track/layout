@@ -1,4 +1,4 @@
-import { Positioner } from "../positioner";
+import { Positioner } from "./positioner";
 import { Section } from "./section";
 import { SectionPosition } from "./position";
 

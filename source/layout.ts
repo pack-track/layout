@@ -5,10 +5,10 @@ import { Router } from "./router";
 import { Section } from "./section";
 import { TilePattern, Tile } from "./tile";
 import { Track } from "./track";
-import { PointPositioner } from "../positioner/point";
 import { Device } from "./device/device";
-import { ResponderType } from "../positioner/responder-type";
+import { ResponderType } from "./positioner/responder-type";
 import { Channel } from "./device/channel";
+import { PointPositioner } from "./positioner/point";
 
 export class Layout {
 	name: string;

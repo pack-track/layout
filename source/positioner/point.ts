@@ -1,6 +1,6 @@
 import { Positioner } from ".";
-import { Channel } from "../source/device/channel";
-import { Track } from "../source/track";
+import { Channel } from "../device/channel";
+import { Track } from "../track";
 import { ResponderType } from "./responder-type";
 
 export class PointPositioner extends Positioner {
