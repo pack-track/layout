@@ -11,3 +11,6 @@ export * from './track';
 export * from './positioner/index';
 export * from './positioner/point';
 export * from './positioner/responder-type';
+
+export * from './device/device';
+export * from './device/channel';
