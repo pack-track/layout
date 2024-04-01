@@ -1,9 +1,12 @@
 {
 	"compilerOptions": {
 		"outDir": ".built",
-		"module": "CommonJS",
+		"module": "esnext",
+		"moduleResolution": "node",
 		"target": "esnext",
 		"declaration": true
 	},
-	"include": ["source"]
+	"include": [
+		"source"
+	]
 }

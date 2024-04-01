@@ -1,10 +1,11 @@
 {
 	"name": "@packtrack/layout",
-	"version": "1.0.5",
+	"version": "1.0.8",
 	"main": ".built/index.js",
 	"typings": ".built/index.d.ts",
+	"sideEffects": false,
 	"scripts": {
-		"prepare": "tsc"
+		"build": "tsc"
 	},
 	"devDependencies": {
 		"typescript": "^5.3.3"
