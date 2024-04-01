@@ -5,7 +5,8 @@
 	"typings": ".built/index.d.ts",
 	"sideEffects": false,
 	"scripts": {
-		"build": "tsc"
+		"build": "tsc",
+		"prepare": "tsc"
 	},
 	"devDependencies": {
 		"typescript": "^5.3.3"
