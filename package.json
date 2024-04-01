@@ -6,7 +6,7 @@
 	"sideEffects": false,
 	"scripts": {
 		"build": "tsc",
-		"prepare": "tsc"
+		"preversion": "tsc"
 	},
 	"devDependencies": {
 		"typescript": "^5.3.3"
