@@ -5,16 +5,19 @@ import { Router } from "./router";
 import { Section } from "./section";
 import { TilePattern, Tile } from "./tile";
 import { Track } from "./track";
-import { Device } from "./device/device";
+import { Device } from "./device/index";
 import { ResponderType } from "./positioner/responder-type";
 import { Channel } from "./device/channel";
 import { PointPositioner } from "./positioner/point";
+import { PowerDistrictActivator } from "./power-district/activator";
+import { PowerDistrictReverser } from "./power-district/reverser";
+import { PowerDistrictMonitor } from "./power-district/monitor";
 
 export class Layout {
 	name: string;
-	
+
 	districts: District[] = [];
-	
+
 	devices: Device[] = [];
 	responderType: ResponderType[] = [];
 
@@ -43,28 +46,28 @@ export class Layout {
 		layout.name = railway.getAttribute('name');
 
 		const version = railway.getAttribute('version');
-		
+
 		if (version == '1') {
 			let district = railway.firstChild;
-			
+
 			while (district) {
 				if (district.tagName == 'district') {
 					layout.districts.push(layout.loadDistrict(district, layout));
 				}
-				
+
 				district = district.nextSibling;
 			}
-			
+
 			district = railway.firstChild;
 			let index = 0;
-			
+
 			while (district) {
 				if (district.tagName == 'district') {
 					layout.linkDistrict(district, layout.districts[index]);
-					
+
 					index++;
 				}
-				
+
 				district = district.nextSibling;
 			}
 		} else {
@@ -73,90 +76,90 @@ export class Layout {
 
 		return layout;
 	}
-	
+
 	loadDistrict(source, parent: District | Layout) {
 		const district = new District(source.getAttribute('name'), parent);
-		
+
 		let child = source.firstChild;
-		
+
 		while (child) {
 			if (child.tagName == 'power-districts') {
 				let powerDistrict = child.firstChild;
-				
+
 				while (powerDistrict) {
 					if (powerDistrict.tagName == 'power-district') {
 						district.powerDistricts.push(this.loadPowerDistrict(powerDistrict, district));
 					}
-					
+
 					powerDistrict = powerDistrict.nextSibling;
 				}
 			}
-			
+
 			if (child.tagName == 'section') {
 				this.loadSection(child, district);
 			}
-			
+
 			if (child.tagName == 'router') {
 				district.routers.push(this.loadRouter(child, district));
 			}
-			
+
 			if (child.tagName == 'district') {
 				district.children.push(this.loadDistrict(child, district));
 			}
-			
+
 			child = child.nextSibling;
 		}
-		
+
 		return district;
 	}
-	
+
 	linkDistrict(source, district: District) {
 		let child = source.firstChild;
-		
+
 		let sectionIndex = 0;
 		let childIndex = 0;
-		
+
 		while (child) {
 			if (child.tagName == 'section') {
 				this.linkSection(child, district.sections[sectionIndex]);
-				
+
 				sectionIndex++;
 			}
-			
+
 			if (child.tagName == 'router') {
 				this.linkRouter(child, district.routers.find(router => router.name == child.getAttribute('name'))!);
 			}
-			
+
 			if (child.tagName == 'district') {
 				this.linkDistrict(child, district.children[childIndex]);
-				
+
 				childIndex++;
 			}
-			
+
 			child = child.nextSibling;
 		}
 	}
-	
+
 	loadSection(source, district: District) {
 		const section = new Section(source.getAttribute('name'), district);
 		district.sections.push(section);
-		
+
 		let child = source.firstChild;
-		
+
 		while (child) {
 			if (child.tagName == 'tracks') {
 				let trackNode = child.firstChild;
-				
+
 				while (trackNode) {
 					if (trackNode.tagName == 'track') {
 						const track = new Track(
-							section, 
-							+trackNode.getAttribute('length'), 
+							section,
+							+trackNode.getAttribute('length'),
 							trackNode.getAttribute('path')
 						);
 
 						section.tracks.push(track);
-						
+
 						let trackChild = trackNode.firstChild;
 
 						while (trackChild) {
@@ -170,7 +173,7 @@ export class Layout {
 										const responderType = this.findResponderType(positioner.getAttribute('responder'));
 
 										track.positioners.push(new PointPositioner(
-											track, 
+											track,
 											+positioner.getAttribute('offset'),
 											channel,
 											responderType
@@ -184,7 +187,7 @@ export class Layout {
 							trackChild = trackChild.nextSibling;
 						}
 					}
-					
+
 					trackNode = trackNode.nextSibling;
 				}
 			}
@@ -198,7 +201,7 @@ export class Layout {
 
 				section.tiles.push(new Tile(section, +child.getAttribute('x'), +child.getAttribute('y'), TilePattern.patterns[pattern]))
 			}
-			
+
 			child = child.nextSibling;
 		}
 	}
@@ -241,111 +244,134 @@ export class Layout {
 
 		return type;
 	}
-	
+
 	linkSection(source, section: Section) {
 		let child = source.firstChild;
-		
+
 		while (child) {
 			if (child.tagName == 'out') {
 				const out = this.findSection(child.getAttribute('section'), section.district);
-				
+
 				section.out = out;
 				out.in = section;
 			}
-			
+
 			child = child.nextSibling;
 		}
 	}
-	
+
 	findSection(path: string, base: District, source = base) {
 		const parts = path.split('.');
-		
+
 		if (parts.length == 0) {
 			throw `section '${path}' not found from '${source.name}': invalid name`;
 		}
-		
+
 		if (parts.length == 1) {
 			const localSection = base.sections.find(section => section.name == parts[0]);
-			
+
 			if (!localSection) {
 				throw new Error(`Section '${path}' not found from '${source.name}': section does not exist in '${base.name}'`);
 			}
-			
+
 			return localSection;
 		}
-		
+
 		const sectionName = parts.pop()!;
-		
+
 		let pool: District | Layout = base;
-		
+
 		for (let index = 0; index < parts.length; index++) {
 			if (pool instanceof Layout || !pool.parent) {
 				throw new Error(`Section '${path}' could not be found from '${source.name}': district '${pool.name}' does not have a parent`);
 			}
-			
+
 			pool = pool.parent!;
 		}
-		
+
 		for (let part of parts) {
 			const child = (pool instanceof District ? pool.children : pool.districts).find(child => child.name == part);
-			
+
 			if (!child) {
 				throw new Error(`Section '${path}' could not be found from '${source.name}': district '${pool.name}' does not have a child named '${part}'`);
 			}
-			
+
 			pool = child;
 		}
 
 		if (pool instanceof Layout) {
 			throw new Error(`Section '${path}' could not be found from '${source.name}': a layout cannot directly include a section`);
 		}
-		
+
 		return this.findSection(sectionName, pool, source);
 	}
-	
+
 	loadRouter(source, district: District) {
 		const router = new Router(source.getAttribute('name'), district);
-		
+
 		return router;
 	}
-	
+
 	linkRouter(source, router: Router) {
 		let child = source.firstChild;
-		
+
 		while (child) {
 			if (child.tagName == 'route') {
 				const route = new Route(child.getAttribute('name'), router);
-				
+
 				route.in = this.findSection(child.getAttribute('in'), router.district);
 				route.in.out = router;
-				
+
 				route.out = this.findSection(child.getAttribute('out'), router.district);
 				route.out.in = router;
-				
+
 				router.routes.push(route);
 			}
-			
+
 			child = child.nextSibling;
 		}
 	}
-	
+
 	loadPowerDistrict(source, district: District) {
 		const powerDistrict = new PowerDistrict(source.getAttribute('name'), district);
-		
+
+		let actor = source.firstChild;
+
+		while (actor) {
+			if (actor.tagName == 'activator' || actor.tagName == 'reverser' || actor.tagName == 'monitor') {
+				const device = this.findDevice(actor.getAttribute('device'));
+				const channel = this.findChannel(device, actor.getAttribute('channel'));
+
+				if (actor.tagName == 'activator') {
+					powerDistrict.activator = new PowerDistrictActivator(device, channel);
+				}
+
+				if (actor.tagName == 'reverser') {
+					powerDistrict.reverser = new PowerDistrictReverser(device, channel);
+				}
+
+				if (actor.tagName == 'monitor') {
+					powerDistrict.monitor = new PowerDistrictMonitor(device, channel);
+				}
+			}
+
+			actor = actor.nextSibling;
+		}
+
 		return powerDistrict;
 	}
 
 	toDot() {
 		let dot = 'digraph G {';
-			
+
 		for (let district of this.districts) {
 			dot += district.toDotDefinition();
 		}
-		
+
 		for (let district of this.districts) {
 			dot += district.toDotConnection();
 		}
-		
+
 		return `${dot}}`;
 	}
 
@@ -366,11 +392,11 @@ export class Layout {
 
 			</style>
 		`;
-		
+
 		for (let district of this.districts) {
 			svg += district.toSVG();
 		}
-			
+
 		return `${svg}${inject}</svg>`;
 	}
 
