@@ -12,6 +12,8 @@ import { PointPositioner } from "./positioner/point";
 import { PowerDistrictActivator } from "./power-district/activator";
 import { PowerDistrictReverser } from "./power-district/reverser";
 import { PowerDistrictMonitor } from "./power-district/monitor";
+import { Monitor } from "./monitor";
+import { Throttle } from "./throttle";
 
 export class Layout {
 	name: string;
@@ -20,6 +22,9 @@ export class Layout {
 
 	devices: Device[] = [];
 	responderType: ResponderType[] = [];
+
+	monitors: Monitor[] = [];
+	throttles: Throttle[] = [];
 
 	get allDistricts() {
 		const districts: District[] = [];
@@ -48,33 +53,53 @@ export class Layout {
 		const version = railway.getAttribute('version');
 
 		if (version == '1') {
-			let district = railway.firstChild;
+			let child = railway.firstChild;
 
-			while (district) {
-				if (district.tagName == 'district') {
-					layout.districts.push(layout.loadDistrict(district, layout));
+			while (child) {
+				if (child.tagName == 'district') {
+					layout.districts.push(layout.loadDistrict(child, layout));
 				}
 
-				district = district.nextSibling;
+				if (child.tagName == 'monitor') {
+					layout.monitors.push(layout.loadMonitor(child, layout));
+				}
+
+				if (child.tagName == 'throttle') {
+					layout.throttles.push(layout.loadThrottle(child, layout));
+				}
+
+				child = child.nextSibling;
 			}
 
-			district = railway.firstChild;
+			child = railway.firstChild;
 			let index = 0;
 
-			while (district) {
-				if (district.tagName == 'district') {
-					layout.linkDistrict(district, layout.districts[index]);
+			while (child) {
+				if (child.tagName == 'district') {
+					layout.linkDistrict(child, layout.districts[index]);
 
 					index++;
 				}
 
-				district = district.nextSibling;
+				child = child.nextSibling;
 			}
 		} else {
-			throw new Error(`unsupported railway definition file version '${version}'`);
+			throw new Error(`Unsupported railway definition file version '${version}'`);
 		}
 
 		return layout;
+	}
+
+	loadMonitor(source, parent: District | Layout) {
+		const montior = new Monitor(this.findDevice(source.getAttribute('device')), parent);
+
+		return montior;
+	}
+
+	loadThrottle(source, parent: District | Layout) {
+		const throttle = new Throttle(this.findDevice(source.getAttribute('device')), parent);
+
+		return throttle;
 	}
 
 	loadDistrict(source, parent: District | Layout) {
@@ -105,6 +130,10 @@ export class Layout {
 
 			if (child.tagName == 'district') {
 				district.children.push(this.loadDistrict(child, district));
+			}
+
+			if (child.tagName == 'monitor') {
+				district.monitors.push(this.loadMonitor(child, district));
 			}
 
 			child = child.nextSibling;
@@ -314,6 +343,7 @@ export class Layout {
 
 	linkRouter(source, router: Router) {
 		let child = source.firstChild;
+		let active: Route;
 
 		while (child) {
 			if (child.tagName == 'route') {
@@ -325,11 +355,21 @@ export class Layout {
 				route.out = this.findSection(child.getAttribute('out'), router.district);
 				route.out.in = router;
 
+				if (child.hasAttribute('active')) {
+					if (active) {
+						throw new Error(`Router '${router.domainName}' has multiple active routes (${active.name}, ${route.name}).`);
+					}
+
+					active = route;
+				}
+
 				router.routes.push(route);
 			}
 
 			child = child.nextSibling;
 		}
+
+		router.activeRoute = active;
 	}
 
 	loadPowerDistrict(source, district: District) {

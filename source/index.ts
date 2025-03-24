@@ -4,8 +4,11 @@ export * from './position';
 export * from './route';
 export * from './router';
 export * from './section';
+export * from './span';
 export * from './tile';
 export * from './track';
+export * from './monitor';
+export * from './throttle';
 
 export * from './power-district/index';
 export * from './power-district/activator';
