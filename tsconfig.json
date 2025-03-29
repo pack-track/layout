@@ -3,6 +3,7 @@
 		"target": "esnext",
 		"module": "esnext",
 		"outDir": ".built",
+		"moduleResolution": "bundler",
 		"declaration": true,
 		"lib": [
 			"esnext"
