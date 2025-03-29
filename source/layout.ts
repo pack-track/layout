@@ -293,14 +293,14 @@ export class Layout {
 		const parts = path.split('.');
 
 		if (parts.length == 0) {
-			throw `section '${path}' not found from '${source.name}': invalid name`;
+			throw new Error(`Section '${path}' not found from '${source.domainName}': invalid name`);
 		}
 
 		if (parts.length == 1) {
 			const localSection = base.sections.find(section => section.name == parts[0]);
 
 			if (!localSection) {
-				throw new Error(`Section '${path}' not found from '${source.name}': section does not exist in '${base.name}'`);
+				throw new Error(`Section '${path}' not found from '${source.domainName}': section does not exist in '${base.name}'`);
 			}
 
 			return localSection;
@@ -312,7 +312,7 @@ export class Layout {
 
 		for (let index = 0; index < parts.length; index++) {
 			if (pool instanceof Layout || !pool.parent) {
-				throw new Error(`Section '${path}' could not be found from '${source.name}': district '${pool.name}' does not have a parent`);
+				throw new Error(`Section '${path}' could not be found from '${source.domainName}': district '${pool.name}' does not have a parent`);
 			}
 
 			pool = pool.parent!;
@@ -322,14 +322,14 @@ export class Layout {
 			const child = (pool instanceof District ? pool.children : pool.districts).find(child => child.name == part);
 
 			if (!child) {
-				throw new Error(`Section '${path}' could not be found from '${source.name}': district '${pool.name}' does not have a child named '${part}'`);
+				throw new Error(`Section '${path}' could not be found from '${source.domainName}': district '${pool.name}' does not have a child named '${part}'`);
 			}
 
 			pool = child;
 		}
 
 		if (pool instanceof Layout) {
-			throw new Error(`Section '${path}' could not be found from '${source.name}': a layout cannot directly include a section`);
+			throw new Error(`Section '${path}' could not be found from '${source.domainName}': a layout cannot directly include a section`);
 		}
 
 		return this.findSection(sectionName, pool, source);
