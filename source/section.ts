@@ -1,19 +1,19 @@
 import { District } from "./district";
 import { SectionPosition } from "./position";
-import { PowerDistrict } from "./power-district";
+import { PowerDistrict } from "./power-district/index";
 import { Router } from "./router";
 import { Tile } from "./tile";
 import { Track } from "./track";
 
 export class Section {
 	powerDistrict: PowerDistrict;
-	
+
 	tracks: Track[] = [];
 	tiles: Tile[] = [];
-	
+
 	in?: Router | Section;
 	out?: Router | Section;
-	
+
 	constructor(
 		public name: string,
 		public district: District
@@ -87,14 +87,14 @@ export class Section {
 					start: 0,
 					end: this.tiles[this.tiles.length - 1].pattern.length
 				},
-			
+
 				tiles: [...this.tiles]
 			};
 		}
 
 		let start = 0;
 		let end = this.length;
-		
+
 		// only use the position limit if it is within our section
 		if (startPosition.section == this) {
 			end = startPosition.absolutePosition;
@@ -131,7 +131,7 @@ export class Section {
 				if (start <= passed) {
 					offset.start = (start + length - passed) * tile.pattern.length / length;
 				}
-	
+
 				if (end >= passed) {
 					offset.end = 0.5; // (start + length - passed) * tile.pattern.length / length;
 				}
@@ -139,29 +139,13 @@ export class Section {
 
 			passed += length;
 		}
-		
+
 		return {
 			offset,
 			tiles
 		};
 	}
-	
-	dump() {
-		console.group(`Section ${this.domainName}`);
-		
-		console.log('in', this.in?.name ?? 'buffer');
-		console.log('out', this.out?.name ?? 'buffer');
-		
-		console.group(`tracks`);
-		
-		for (let track of this.tracks) {
-			track.dump();
-		}
-		
-		console.groupEnd();
-		console.groupEnd();
-	}
-	
+
 	get length() {
 		return this.tracks.reduce((accumulator, track) => accumulator + track.length, 0);
 	}
@@ -226,44 +210,5 @@ export class Section {
 
 			tip: new SectionPosition(tip, reversed ? -length : tip.length + length, false)
 		};
-	}
-	
-	toDotReference() {
-		return `section_${this.name.replace(/-/g, '_')}_${this.district.toDotReference()}`;
-	}
-	
-	toDotDefinition() {
-		return `
-			${this.toDotReference()} [ label = ${JSON.stringify(`${this.name}\n${this.length}`)}, shape = box ]
-		`;
-	}
-	
-	toDotConnection() {
-		return `
-			${this.out instanceof Section ? `${this.toDotReference()} -> ${this.out.toDotReference()}` : ''}
-		`;
-	}
-
-	toSVG() {
-		return `
-			<g id=${JSON.stringify(this.domainName).split('.').join('_')}>
-				<style>
-
-					g#${this.domainName.split('.').join('_')} path {
-						stroke: hsl(${(this.length / this.tileLength)}deg, 100%, 50%);
-					}
-
-				</style>
-
-				${this.tiles.map(tile => tile.toSVG()).join('')}
-			</g>
-		`;
-	}
-
-	findSVGPositions() {
-		return this.tiles.map(tile => ({ 
-			x: tile.x,
-			y: tile.y
-		}));
 	}
 }

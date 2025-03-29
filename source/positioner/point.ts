@@ -1,4 +1,4 @@
-import { Positioner } from ".";
+import { Positioner } from "./index";
 import { Channel } from "../device/channel";
 import { Track } from "../track";
 import { ResponderType } from "./responder-type";
@@ -15,14 +15,5 @@ export class PointPositioner extends Positioner {
 
 	get position() {
 		return this.track.head.advance(this.offset);
-	}
-	
-	dump() {
-		console.group('Point positioner');
-		console.log('offset:', this.offset);
-
-		this.channel.dump();
-
-		console.groupEnd();
 	}
 }

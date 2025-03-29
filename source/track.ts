@@ -1,4 +1,4 @@
-import { Positioner } from "./positioner";
+import { Positioner } from "./positioner/index";
 import { Section } from "./section";
 import { SectionPosition } from "./position";
 
@@ -19,12 +19,8 @@ export class Track {
 			if (track == this) {
 				return new SectionPosition(this.section, offset, false);
 			}
-			
+
 			offset += track.length;
 		}
-	}
-	
-	dump() {
-		console.log(this.length);
 	}
 }

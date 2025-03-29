@@ -1,5 +1,5 @@
 import { District } from "./district";
-import { PowerDistrict } from "./power-district";
+import { PowerDistrict } from "./power-district/index";
 import { Route } from "./route";
 import { Router } from "./router";
 import { Section } from "./section";
@@ -399,67 +399,5 @@ export class Layout {
 		}
 
 		return powerDistrict;
-	}
-
-	toDot() {
-		let dot = 'digraph G {';
-
-		for (let district of this.districts) {
-			dot += district.toDotDefinition();
-		}
-
-		for (let district of this.districts) {
-			dot += district.toDotConnection();
-		}
-
-		return `${dot}}`;
-	}
-
-	toSVG(inject = '') {
-		const positons = this.districts.map(district => district.findSVGPositions()).flat(Infinity);
-
-		const width = Math.max(...positons.map(position => position.x));
-		const height = Math.max(...positons.map(position => position.y));
-
-		let svg = `<svg width="100vw" height="100vh" viewBox="0 0 ${width + 1} ${height + 1}" xmlns="http://www.w3.org/2000/svg">
-			<style>
-
-				path {
-					fill: none;
-					stroke: #000;
-					stroke-width: 0.2;
-				}
-
-			</style>
-		`;
-
-		for (let district of this.districts) {
-			svg += district.toSVG();
-		}
-
-		return `${svg}${inject}</svg>`;
-	}
-
-	dump() {
-		console.group(`Layout ${this.name}`);
-		console.log('devices');
-
-		for (let device of this.devices) {
-			device.dump();
-		}
-
-		console.log('responder types');
-
-		for (let type of this.responderType) {
-			type.dump();
-		}
-
-		console.log('districts');
-
-		for (let district of this.districts) {
-			district.dump();
-		}
-
-		console.groupEnd();
 	}
 }

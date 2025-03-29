@@ -6,9 +6,9 @@ export class Channel {
 		public name: string
 	) {}
 
-	dump() {
-		console.log(`Channel '${this.name}' on ${this.device.identifier}`);
-	}
-
 	publish(data: any) {}
+
+	toString() {
+		return `${this.device.identifier}/${this.name}`;
+	}
 }
