@@ -343,7 +343,6 @@ export class Layout {
 
 	linkRouter(source, router: Router) {
 		let child = source.firstChild;
-		let active: Route;
 
 		while (child) {
 			if (child.tagName == 'route') {
@@ -355,21 +354,23 @@ export class Layout {
 				route.out = this.findSection(child.getAttribute('out'), router.district);
 				route.out.in = router;
 
-				if (child.hasAttribute('active')) {
-					if (active) {
-						throw new Error(`Router '${router.domainName}' has multiple active routes (${active.name}, ${route.name}).`);
-					}
-
-					active = route;
-				}
-
 				router.routes.push(route);
 			}
 
 			child = child.nextSibling;
 		}
 
-		router.activeRoute = active;
+		const active = source.getAttribute('active');
+
+		if (active) {
+			const route = router.routes.find(route => route.name == active);
+
+			if (!route) {
+				throw new Error(`Router '${router.domainName}' cannot have active route '${active}': Router has no such route (available: ${router.routes.map(route => route.name).join(', ')})`);
+			}
+
+			router.activeRoute = route;
+		}
 	}
 
 	loadPowerDistrict(source, district: District) {
