@@ -14,6 +14,7 @@ import { PowerDistrictReverser } from "./power-district/reverser";
 import { PowerDistrictMonitor } from "./power-district/monitor";
 import { Monitor } from "./monitor";
 import { Throttle } from "./throttle";
+import { RouteController } from "./route-controller";
 
 export class Layout {
 	name: string;
@@ -344,7 +345,14 @@ export class Layout {
 	linkRouter(source, router: Router) {
 		let child = source.firstChild;
 
+		// controller can be set on router level if common for all routes
+		let commonController: Channel;
+
 		while (child) {
+			if (child.tagName == 'controller') {
+				commonController = this.findChannel(this.findDevice(child.getAttribute('device')), child.getAttribute('channel'));
+			}
+
 			if (child.tagName == 'route') {
 				const route = new Route(child.getAttribute('name'), router);
 
@@ -353,6 +361,28 @@ export class Layout {
 
 				route.out = this.findSection(child.getAttribute('out'), router.district);
 				route.out.in = router;
+
+				if (child.hasAttribute('command')) {
+					const controller = new RouteController();
+					controller.channel = commonController;
+					controller.command = child.getAttribute('command');
+
+					route.controllers.push(controller);
+				}
+
+				let routeChild = child.firstChild;
+
+				while (routeChild) {
+					if (routeChild.tagName == 'controller') {
+						const controller = new RouteController();
+						controller.channel = this.findChannel(this.findDevice(routeChild.getAttribute('device')), routeChild.getAttribute('channel'));
+						controller.command = routeChild.getAttribute('command');
+
+						route.controllers.push(controller);
+					}
+
+					routeChild = routeChild.nextSibling;
+				}
 
 				router.routes.push(route);
 			}

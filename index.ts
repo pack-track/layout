@@ -2,6 +2,7 @@ export * from './source/district';
 export * from './source/layout';
 export * from './source/position';
 export * from './source/route';
+export * from './source/route-controller';
 export * from './source/router';
 export * from './source/section';
 export * from './source/span';
