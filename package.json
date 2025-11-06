@@ -1,6 +1,6 @@
 {
 	"name": "@packtrack/layout",
-	"version": "1.6.3",
+	"version": "1.6.4",
 	"type": "module",
 	"main": ".built/index.js",
 	"typings": ".built/index.d.ts",
