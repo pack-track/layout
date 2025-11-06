@@ -24,6 +24,8 @@ export class Span {
 					return true;
 				}
 			}
+
+			return false;
 		}
 
 		if (position.section == this.head.section) {
