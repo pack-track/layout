@@ -46,6 +46,11 @@ export class Span {
 	}
 
 	get length() {
+		// TODO verify reverse
+		if (this.head.section == this.tail.section) {
+			return Math.abs(this.head.offset - this.tail.offset);
+		}
+
 		let length = 0;
 
 		if (this.head.reversed) {
@@ -58,10 +63,11 @@ export class Span {
 			length += section.length;
 		}
 
+		// TODO verify
 		if (this.tail.reversed) {
-			length += this.tail.section.length - this.tail.offset;
-		} else {
 			length += this.tail.offset;
+		} else {
+			length += this.tail.section.length - this.tail.offset;
 		}
 
 		return length;
