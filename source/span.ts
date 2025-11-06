@@ -16,11 +16,11 @@ export class Span {
 
 		if (position.section == this.head.section && position.section == this.tail.section) {
 			if (this.head.reversed) {
-				if (this.head.absolutePosition > position.absolutePosition && this.tail.absolutePosition < position.absolutePosition) {
+				if (this.head.absolutePosition >= position.absolutePosition && this.tail.absolutePosition <= position.absolutePosition) {
 					return true;
 				}
 			} else {
-				if (this.head.offset < position.absolutePosition && this.tail.offset > position.absolutePosition) {
+				if (this.head.offset <= position.absolutePosition && this.tail.offset >= position.absolutePosition) {
 					return true;
 				}
 			}
@@ -30,11 +30,11 @@ export class Span {
 
 		if (position.section == this.head.section) {
 			if (this.head.reversed) {
-				if (this.head.absolutePosition > position.absolutePosition) {
+				if (this.head.absolutePosition >= position.absolutePosition) {
 					return true;
 				}
 			} else {
-				if (this.head.offset < position.absolutePosition) {
+				if (this.head.offset <= position.absolutePosition) {
 					return true;
 				}
 			}
@@ -42,11 +42,11 @@ export class Span {
 
 		if (position.section == this.tail.section) {
 			if (this.tail.reversed) {
-				if (this.tail.absolutePosition < position.absolutePosition) {
+				if (this.tail.absolutePosition <= position.absolutePosition) {
 					return true;
 				}
 			} else {
-				if (this.tail.offset > position.absolutePosition) {
+				if (this.tail.offset >= position.absolutePosition) {
 					return true;
 				}
 			}
