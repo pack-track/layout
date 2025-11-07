@@ -2,6 +2,7 @@ import { District } from "./district";
 import { SectionPosition } from "./position";
 import { PowerDistrict } from "./power-district/index";
 import { Router } from "./router";
+import { Span } from "./span";
 import { Tile } from "./tile";
 import { Track } from "./track";
 
@@ -80,68 +81,41 @@ export class Section {
 		}
 	}
 
+	// TODO verifiy reverse
 	getTilesInRange(startPosition: SectionPosition, endPosition: SectionPosition) {
-		if (startPosition.section != this && endPosition.section != this) {
-			return {
-				offset: {
-					start: 0,
-					end: this.tiles[this.tiles.length - 1].pattern.length
-				},
+		const span = Span.trail(startPosition, endPosition);
 
-				tiles: [...this.tiles]
-			};
-		}
-
-		let start = 0;
-		let end = this.length;
-
-		// only use the position limit if it is within our section
-		if (startPosition.section == this) {
-			end = startPosition.absolutePosition;
-		}
-
-		if (endPosition.section == this) {
-			start = endPosition.absolutePosition;
-		}
-
-		// flip if the range was reversed
-		if (end < start) {
-			const small = end;
-
-			end = start;
-			start = small;
-		}
-
-		let passed = 0;
 		const tiles: Tile[] = [];
 
-		const tileUnitLength = this.length / this.tileLength;
+		let sectionLength = 0;
 
-		const offset = {
-			start: 0,
-			end: 0
-		};
+		if (startPosition.section == endPosition.section) {
+			sectionLength = startPosition.section.length;
+			tiles.push(...startPosition.section.tiles);
+		} else {
+			sectionLength += startPosition.section.length;
+			tiles.push(...startPosition.section.tiles);
 
-		for (let tile of this.tiles) {
-			const length = tile.pattern.length * tileUnitLength;
-
-			if (start - length <= passed && end + length >= passed) {
-				tiles.push(tile);
-
-				if (start <= passed) {
-					offset.start = (start + length - passed) * tile.pattern.length / length;
-				}
-
-				if (end >= passed) {
-					offset.end = 0.5; // (start + length - passed) * tile.pattern.length / length;
-				}
+			for (let inside of span.inside) {
+				sectionLength += inside.length;
+				tiles.push(...inside.tiles);
 			}
 
-			passed += length;
+			sectionLength += endPosition.section.length;
+			tiles.push(...endPosition.section.tiles);
 		}
 
+		let tileLength = 0;
+
+		for (let tile of tiles) {
+			tileLength += tile.pattern.length;
+		}
+
+		const start = tileLength / sectionLength * startPosition.absolutePosition;
+		const end = tileLength - tileLength / sectionLength * (endPosition.section.length - endPosition.absolutePosition);
+
 		return {
-			offset,
+			offset: { start, end },
 			tiles
 		};
 	}
