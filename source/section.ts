@@ -86,7 +86,6 @@ export class Section {
 		const span = Span.trail(startPosition, endPosition);
 
 		const tiles: Tile[] = [];
-
 		let sectionLength = 0;
 
 		if (startPosition.section == endPosition.section) {

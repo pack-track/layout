@@ -45,10 +45,8 @@ export class Layout {
 		return districts;
 	}
 
-	static from(document: any) {
+	static from(railway: any) {
 		const layout = new Layout();
-
-		const railway = document.firstChild!;
 		layout.name = railway.getAttribute('name');
 
 		const version = railway.getAttribute('version');
