@@ -172,6 +172,10 @@ export class Layout {
 		const section = new Section(source.getAttribute('name'), district);
 		district.sections.push(section);
 
+		if (source.hasAttribute('power-district')) {
+			section.powerDistrict = district.powerDistricts.find(district => district.name == source.hasAttribute('power-district'));
+		}
+
 		let child = source.firstChild;
 
 		while (child) {
